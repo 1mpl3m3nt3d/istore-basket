@@ -8,7 +8,8 @@
 
 * text=auto eol=lf
 
-*.txt text eol=lf
+*.TXT text eol=lf
+*.[Tt]xt text eol=lf
 
 ###############################################################################
 # Force ASP.NET Web Page files to always use CRLF line endings.
@@ -98,11 +99,11 @@
 ###############################################################################
 
 *.BAT text eol=crlf
-*.bat text eol=crlf
+*.[Bb]at text eol=crlf
 *.CMD text eol=crlf
-*.cmd text eol=crlf
+*.[Cc]md text eol=crlf
 *.COM text eol=crlf
-*.com text eol=crlf
+*.[Cc]om text eol=crlf
 *.wslconfig text eol=crlf
 
 ###############################################################################
@@ -111,11 +112,11 @@
 ###############################################################################
 
 *.CONF text eol=lf
-*.conf text eol=lf
+*.[Cc]onf text eol=lf
 *.SH text eol=lf
-*.sh text eol=lf
+*.[Ss]h text eol=lf
 *.ZSH text eol=lf
-*.zsh text eol=lf
+*.[Zz]sh text eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.
@@ -203,11 +204,11 @@
 #*.DOT diff=astextplain
 #*.PDF diff=astextplain
 #*.RTF diff=astextplain
-#*.doc diff=astextplain
-#*.docx diff=astextplain
-#*.dot diff=astextplain
-#*.pdf diff=astextplain
-#*.rtf diff=astextplain
+#*.[Dd]oc diff=astextplain
+#*.[Dd]ocx diff=astextplain
+#*.[Dd]ot diff=astextplain
+#*.[Pp]df diff=astextplain
+#*.[Rr]tf diff=astextplain
 
 ###############################################################################
 # Git Large File System (LFS)

@@ -2,19 +2,7 @@
 ## Ignore various os-specific temporary and executable files
 ##
 
-**/$RECYCLE.BIN
-**/$[Rr]ecycle.[Bb]in
-**/*.cache
-**/*.lnk
-**/*.log
-**/*.logs
-**/*.report
-**/*.reports
-**/*.stackdump
-**/*.swap
-**/*.temp
-**/*.tmp
-**/*~*
+**/._*
 **/.[Cc]ache
 **/.[Cc]aches
 **/.[Ll]og
@@ -24,26 +12,23 @@
 **/.[Ss]wap
 **/.[Tt]emp
 **/.[Tt]mp
+**/.apdisk
 **/.AppleDB
 **/.AppleDesktop
 **/.AppleDouble
-**/.DS_Store
+**/.com.apple.timemachine.donotpresent
+**/.directory
 **/.DocumentRevisions-V100
+**/.DS_Store
+**/.fseventsd
+**/.fuse_hidden*
 **/.LSOverride
+**/.nfs*
 **/.Spotlight-V100
 **/.TemporaryItems
 **/.Trash-*
 **/.Trashes
 **/.VolumeIcon.icns
-**/._*
-**/.apdisk
-**/.com.apple.timemachine.donotpresent
-**/.directory
-**/.fseventsd
-**/.fuse_hidden*
-**/.nfs*
-**/Network Trash Folder
-**/Temporary Items
 **/[Cc]ache
 **/[Cc]aches
 **/[Dd]esktop.ini
@@ -57,9 +42,26 @@
 **/[Tt]humbs.db
 **/[Tt]humbs.db:encryptable
 **/[Tt]mp
-**/ehthumbs.db
-**/ehthumbs_vista.db
+**/*.cache
+**/*.lnk
+**/*.log
+**/*.logs
+**/*.report
+**/*.reports
+**/*.stackdump
+**/*.swap
+**/*.temp
+**/*.tmp
+**/*~*
 **/~$*
+**/$[Rr]ecycle.[Bb]in
+**/$RECYCLE.BIN
+**/ehthumbs_vista.db
+**/ehthumbs.db
+**/Network Trash Folder
+**/Network\ Trash\ Folder
+**/Temporary Items
+**/Temporary\ Items
 
 ##
 ## Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -96,16 +98,16 @@
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
+# since they will be recreated, and may cause churn. Comment if not using
 # auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
+.idea/artifacts
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/modules.xml
+.idea/*.iml
+.idea/modules
+*.iml
+*.ipr
 
 # CMake
 cmake-build-*/
@@ -166,14 +168,20 @@ mono_crash.*
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
+[Dd]ebugs/
 [Rr]elease/
+[Rr]eleasePublic/
 [Rr]eleases/
 x64/
 x86/
+[Ww][Ii][Nn]/
 [Ww][Ii][Nn]32/
+[Ww][Ii][Nn]64/
 [Aa][Rr][Mm]/
+[Aa][Rr][Mm]32/
 [Aa][Rr][Mm]64/
 bld/
+build/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
@@ -181,6 +189,7 @@ bld/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
+
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
@@ -343,12 +352,15 @@ PublishScripts/
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
+
 # The packages folder can be ignored because of Package Restore
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
+
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
+
 # NuGet v3's project.json files produces more ignorable files
 *.nuget.props
 *.nuget.targets
@@ -393,7 +405,7 @@ orleans.codegen.cs
 
 # Since there are multiple workflows, uncomment next line to ignore bower_components
 # (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
-#bower_components/
+bower_components/
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -475,8 +487,8 @@ __pycache__/
 *.pyc
 
 # Cake - Uncomment if you are using it
-# tools/**
-# !tools/packages.config
+#tools/**
+#!tools/packages.config
 
 # Tabs Studio
 *.tss
@@ -525,6 +537,8 @@ FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
 .vscode/*
+.vscode/**
+.vscode/**/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -565,10 +579,13 @@ tempkey.jwk
 logs
 *.log
 npm-debug.log*
+npm-error.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+lerna-error.log*
 .pnpm-debug.log*
+.pnpm-error.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -599,6 +616,7 @@ bower_components
 .lock-wscript
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Debug
 build/Release
 
 # Builded apps
@@ -640,6 +658,8 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
+.env*.local
+.env.*.local
 .env.ci.local
 .env.dev.local
 .env.development.local
@@ -667,12 +687,16 @@ web_modules/
 .next
 out
 
+# Vercel folder
+.vercel
+
 # Nuxt.js build / generate output
 .nuxt
 #dist
 
 # Gatsby files
 .cache/
+
 # Comment in the public line in if your project uses Gatsby and not Next.js
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
@@ -699,11 +723,20 @@ out
 # TernJS port file
 .tern-port
 
+# VSCode debug
+.vscode-debug
+
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# Misc
+.DS_Store
+*.pem
+
 # yarn v2
 .yarn/*
+.yarn/**
+.yarn/**/*
 .yarn/cache
 !.yarn/patches
 !.yarn/plugins
@@ -713,10 +746,19 @@ out
 !.yarn/versions
 .yarn/build-state.yml
 .yarn/install-state.gz
+
+# yarn .pnp*
+.pnp
+.pnp*
 .pnp.*
+
+# yarn yarnrc.yml
+#.yarnrc
 #.yarnrc*
 !.yarnrc.yml
-#yarn.lock
+
+# yarn yarn.lock
+!yarn.lock
 
 # npm package-lock.json
-#package-lock.json
+!package-lock.json
