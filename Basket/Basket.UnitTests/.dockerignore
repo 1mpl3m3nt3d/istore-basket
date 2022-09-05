@@ -798,13 +798,20 @@ out
 .yarn/*
 .yarn/**
 .yarn/**/*
-.yarn/cache
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-.yarn/unplugged
-!.yarn/versions
+.yarn/cache/
+.yarn/cache/**
+!.yarn/patches/
+!.yarn/patches/**
+!.yarn/plugins/
+!.yarn/plugins/**
+!.yarn/releases/
+!.yarn/releases/**
+!.yarn/sdks/
+!.yarn/sdks/**
+.yarn/unplugged/
+.yarn/unplugged/**
+!.yarn/versions/
+!.yarn/versions/**
 .yarn/build-state.yml
 .yarn/install-state.gz
 
