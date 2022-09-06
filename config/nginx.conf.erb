@@ -1,13 +1,15 @@
 daemon off;
 
-# heroku dynos have at least 4 cores, nginx default = 1
-worker_processes <%= ENV['NGINX_WORKERS'] || 4 %>;
+#user nobody; # default = nobody
 
-#user nobody
+worker_processes <%= ENV['NGINX_WORKERS'] || 4 %>; # heroku dynos have at least 4 cores, default = 1
 worker_rlimit_nofile 8192;
-pid logs/nginx/nginx.pid;
 
-#error_log logs/nginx/error.log;
+pid <%= ENV['NGINX_PID_PATH'] || 'logs/nginx/nginx.pid' %>;
+
+error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %>;
+#error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %> info;
+#error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %> notice;
 
 events {
   use epoll;
@@ -21,10 +23,13 @@ http {
   # from the root directory (absolute reference) vs
   # the current location (relative reference)
 
-  include conf/mime.types;
+  include mime.types;
+  #include proxy.conf;
+  #include fastcgi.conf;
 
-  #include /etc/nginx/proxy.conf;
-  #include /etc/nginx/fastcgi.conf;
+  #include /etc/nginx/conf/mime.types;
+  #include /etc/nginx/conf/proxy.conf;
+  #include /etc/nginx/conf/fastcgi.conf;
 
   #index index.html index.htm index.php;
 
@@ -35,30 +40,35 @@ http {
 
   server_tokens off;
 
+  server_names_hash_bucket_size 128; # this seems to be required for some vhosts
+
   default_type application/octet-stream;
 
   log_format main '$remote_addr - $remote_user [$time_local] $status '
-    '"$request" $body_bytes_sent "$http_referer" '
-    '"$http_user_agent" "$http_x_forwarded_for"';
+                  '"$request" $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for"';
 
   #log_format l2met 'measure#nginx.service=$request_time request_id=$http_x_request_id';
 
-  access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/access.log' %> main;
+  #error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %>;
+  #error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %> info;
+  #error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %> notice;
+
+  #access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/access.log' %> main;
   #access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/access.log' %> l2met;
 
-  error_log <%= ENV['NGINX_ERROR_LOG_PATH'] || 'logs/nginx/error.log' %>;
-
   sendfile on;
-  tcp_nopush on;
+  #tcp_nopush on;
 
-  # this seems to be required for some vhosts
-  server_names_hash_bucket_size 128;
+  #keepalive_timeout 0;
 
-  # must read the body in 5 seconds
-  client_body_timeout <%= ENV['NGINX_CLIENT_BODY_TIMEOUT'] || 5 %>;
+  #client_body_timeout <%= ENV['NGINX_CLIENT_BODY_TIMEOUT'] || 5 %>; # must read the body in 5 seconds
+  #client_max_body_size 1M;
+  #client_body_buffer_size 256k;
 
   upstream app_server {
-    server unix:/tmp/nginx.socket fail_timeout=0; #host.docker.internal:5001 weight=1 fail_timeout=0;
+    server unix:/tmp/nginx.socket weight=1 fail_timeout=0;
+    #server host.docker.internal:5001 weight=1 fail_timeout=0;
   }
 
   server {
@@ -68,16 +78,24 @@ http {
     server_name _;
 
     keepalive_timeout 5;
+
     client_max_body_size <%= ENV['NGINX_CLIENT_MAX_BODY_SIZE'] || 1 %>M;
     client_body_buffer_size 256k;
+    client_body_timeout <%= ENV['NGINX_CLIENT_BODY_TIMEOUT'] || 5 %>; # must read the body in 5 seconds
+
+    access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/_.access.log' %> main;
 
     location / {
+
       # force SSL / redirect http -> https
       if ($http_x_forwarded_proto != "https") {
         return 301 https://$host$request_uri;
       }
 
       proxy_pass http://app_server; # server listens here and receives nginx requests
+
+      #proxy_pass http://host.docker.internal:5001 weight=1 fail_timeout=0;
+      #proxy_pass http://unix:/tmp/nginx.socket weight=1 fail_timeout=0;
 
       proxy_redirect off;
 
@@ -87,6 +105,7 @@ http {
 
       proxy_set_header Host $http_host;
       proxy_set_header X-Real-IP $remote_addr;
+
       proxy_set_header Upgrade-Insecure-Requests 1;
 
       #proxy_set_header Access-Control-Allow-Origin '*';
@@ -138,7 +157,9 @@ http {
     #}
   }
 
-  #server { # php/fastcgi
+  # simple php/fastcgi
+  #
+  #server {
   #  listen 80;
   #  server_name domain1.com www.domain1.com;
   #  access_log logs/domain1.access.log main;
@@ -149,7 +170,9 @@ http {
   #  }
   #}
 
-  #server { # simple reverse-proxy
+  # simple reverse-proxy
+  #
+  #server {
   #  listen 80;
   #  server_name domain2.com www.domain2.com;
   #  access_log logs/domain2.access.log main;
@@ -166,20 +189,116 @@ http {
   #  }
   #}
 
+  # simple load balancing
+  #
   #upstream big_server_com {
   #  server 127.0.0.3:8000 weight=5;
   #  server 127.0.0.3:8001 weight=5;
   #  server 192.168.0.1:8000;
   #  server 192.168.0.1:8001;
   #}
-
-  #server { # simple load balancing
+  #
+  #server {
   #  listen 80;
   #  server_name big.server.com;
   #  access_log logs/big.server.access.log main;
   #
   #  location / {
   #    proxy_pass http://big_server_com;
+  #  }
+  #}
+
+  # simple server
+  #
+  #server {
+  #  listen 80;
+  #  listen [::]:80;
+  #  server_name localhost;
+  #
+  #  #charset utf-8;
+  #  #charset koi8-r;
+  #
+  #  #access_log /var/log/nginx/host.access.log main;
+  #
+  #  location / {
+  #    root html;
+  #    index index.html index.htm;
+  #  }
+  #
+  #  #location / {
+  #  #  root /usr/share/nginx/html;
+  #  #  index index.html index.htm;
+  #  #}
+  #
+  #  #error_page 404 /404.html;
+  #
+  #  # redirect server error pages to the static page /50x.html
+  #  #
+  #  error_page 500 502 503 504 /50x.html;
+  #  location = /50x.html {
+  #    root html;
+  #  }
+  #
+  #  #error_page 500 502 503 504 /50x.html;
+  #  #location = /50x.html {
+  #  #  root /usr/share/nginx/html;
+  #  #}
+  #
+  #  # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+  #  #
+  #  #location ~ \.php$ {
+  #  #  proxy_pass http://127.0.0.1;
+  #  #}
+  #
+  #  # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+  #  #
+  #  #location ~ \.php$ {
+  #  #  root           html;
+  #  #  fastcgi_pass   127.0.0.1:9000;
+  #  #  fastcgi_index  index.php;
+  #  #  fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+  #  #  include        fastcgi_params;
+  #  #}
+  #
+  #  # deny access to .htaccess files, if Apache's document root
+  #  # concurs with nginx's one
+  #  #
+  #  #location ~ /\.ht {
+  #  #  deny all;
+  #  #}
+  #}
+
+  # another virtual host using mix of IP-, name-, and port-based configuration
+  #
+  #server {
+  #  listen 8000;
+  #  listen somename:8080;
+  #  server_name somename alias another.alias;
+  #
+  #  location / {
+  #    root html;
+  #    index index.html index.htm;
+  #  }
+  #}
+
+  # simple https server
+  #
+  #server {
+  #  listen 443 ssl;
+  #  server_name localhost;
+  #
+  #  ssl_certificate cert.pem;
+  #  ssl_certificate_key cert.key;
+  #
+  #  ssl_session_cache shared:SSL:1m;
+  #  ssl_session_timeout 5m;
+  #
+  #  ssl_ciphers HIGH:!aNULL:!MD5;
+  #  ssl_prefer_server_ciphers on;
+  #
+  #  location / {
+  #    root html;
+  #    index index.html index.htm;
   #  }
   #}
 }
