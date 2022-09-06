@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <CodeAnalysisRuleSet>../../settings.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\settings.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors></WarningsAsErrors>
     <WarningsNotAsErrors></WarningsNotAsErrors>
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Infrastructure\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
