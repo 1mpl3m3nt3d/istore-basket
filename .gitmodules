@@ -1,3 +1,9 @@
 [submodule "Infrastructure"]
 	path = Infrastructure
 	url = https://github.com/1mpl3m3nt3d/istore-infrastructure.git
+    update = checkout
+    brach = HEAD
+    fetchRecurseSubmodules = true
+    ignore = none
+    shallow = false
+    revision = c2c14cc
