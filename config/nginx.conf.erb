@@ -121,19 +121,19 @@ http {
     }
 
     #location /basket/swagger {
-    #  return 301 <%= ENV["REACT_APP_BASKET_API_URL"] || http://host.docker.internal:5003 %>/swagger;
+    #  return 301 <%= ENV["REACT_APP_BASKET_API_URL"] || 'http://host.docker.internal:5003' %>/swagger;
     #}
 
     #location /catalog/swagger {
-    #  return 301 <%= ENV["REACT_APP_CATALOG_API_URL"] || http://host.docker.internal:5000 %>/swagger;
+    #  return 301 <%= ENV["REACT_APP_CATALOG_API_URL"] || 'http://host.docker.internal:5000' %>/swagger;
     #}
 
     #location /identity {
-    #  return 301 <%= ENV["REACT_APP_IDENTITY_URL"] || http://host.docker.internal:5002 %>;
+    #  return 301 <%= ENV["REACT_APP_IDENTITY_URL"] || 'http://host.docker.internal:5002' %>;
     #}
 
     #location /pgadmin {
-    #  return 301 <%= ENV["REACT_APP_PGADMIN_URL"] || http://host.docker.internal:8001 %>/login;
+    #  return 301 <%= ENV["REACT_APP_PGADMIN_URL"] || 'http://host.docker.internal:8001' %>/login;
     #}
 
     #location /basket/swagger {
