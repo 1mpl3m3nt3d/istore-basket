@@ -1,6 +1,6 @@
 [submodule "Infrastructure"]
-	path = Infrastructure
-	url = https://github.com/1mpl3m3nt3d/istore-infrastructure.git
+    path = Infrastructure
+    url = https://github.com/1mpl3m3nt3d/istore-infrastructure.git
     update = checkout
     brach = HEAD
     fetchRecurseSubmodules = true

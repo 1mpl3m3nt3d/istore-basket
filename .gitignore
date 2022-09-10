@@ -2,16 +2,21 @@
 ## Ignore various os-specific temporary and executable files
 ##
 
-**/._*
-**/.[Cc]ache
-**/.[Cc]aches
-**/.[Ll]og
-**/.[Ll]ogs
-**/.[Rr]eport
-**/.[Rr]eports
-**/.[Ss]wap
-**/.[Tt]emp
-**/.[Tt]mp
+**/$RECYCLE.BIN
+**/$[Rr]ecycle.[Bb]in
+**/*.*proj.user
+**/*.cache
+**/*.lnk
+**/*.log
+**/*.logs
+**/*.report
+**/*.reports
+**/*.stackdump
+**/*.swap
+**/*.temp
+**/*.tmp
+**/*.[Dd]ot[Ss]ettings*
+**/*~*
 **/.apdisk
 **/.AppleDB
 **/.AppleDesktop
@@ -24,11 +29,33 @@
 **/.fuse_hidden*
 **/.LSOverride
 **/.nfs*
+**/.project
+**/.settings
 **/.Spotlight-V100
 **/.TemporaryItems
+**/.toolstarget
 **/.Trash-*
 **/.Trashes
 **/.VolumeIcon.icns
+**/.vs
+**/.[Cc]ache
+**/.[Cc]aches
+**/.[Ll]og
+**/.[Ll]ogs
+**/.[Rr]eport
+**/.[Rr]eports
+**/.[Ss]wap
+**/.[Tt]emp
+**/.[Tt]mp
+**/._*
+**/azds.yaml
+**/ehthumbs.db
+**/ehthumbs_vista.db
+**/Network Trash Folder
+**/Network\ Trash\ Folder
+**/tempkey.jwk
+**/Temporary Items
+**/Temporary\ Items
 **/[Cc]ache
 **/[Cc]aches
 **/[Dd]esktop.ini
@@ -37,31 +64,14 @@
 **/[Ll]ogs
 **/[Rr]eport
 **/[Rr]eports
+**/[Ss]ecrets.[Dd]ev.yaml
 **/[Ss]wap
 **/[Tt]emp
 **/[Tt]humbs.db
 **/[Tt]humbs.db:encryptable
 **/[Tt]mp
-**/*.cache
-**/*.lnk
-**/*.log
-**/*.logs
-**/*.report
-**/*.reports
-**/*.stackdump
-**/*.swap
-**/*.temp
-**/*.tmp
-**/*~*
+**/[Vv]alues.[Dd]ev.yaml
 **/~$*
-**/$[Rr]ecycle.[Bb]in
-**/$RECYCLE.BIN
-**/ehthumbs_vista.db
-**/ehthumbs.db
-**/Network Trash Folder
-**/Network\ Trash\ Folder
-**/Temporary Items
-**/Temporary\ Items
 
 ##
 ## Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -536,9 +546,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-.vscode/*
 .vscode/**
-.vscode/**/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -547,6 +555,7 @@ FodyWeavers.xsd
 
 # VS Code custom files
 !.vscode/*.code-snippets
+!.vscode/settings.global.json
 !.vscode/settings.*
 !.vscode/tasks.*
 !.vscode/launch.*
@@ -658,20 +667,25 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env*.local
 .env.*.local
 .env.ci.local
 .env.dev.local
 .env.development.local
+.env.docker.local
 .env.prod.local
 .env.production.local
 .env.stage.local
 .env.staging.local
 .env.test.local
+.env.local.*
 .env.local
+#.env.*.docker
 #.env.ci
 #.env.dev
 #.env.development
+#.env.docker.*
+#.env.docker.dev
+#.env.docker.prod
 #.env.prod
 #.env.production
 #.env.stage
@@ -733,39 +747,36 @@ out
 .DS_Store
 *.pem
 
-# yarn v2
-.yarn/*
+# lock files
+!package-lock.json
+!yarn.lock
+
+# yarn files
 .yarn/**
-.yarn/**/*
+
 .yarn/cache/
 .yarn/cache/**
-!.yarn/patches/
-!.yarn/patches/**
+.yarn/patches/
+.yarn/patches/**
 !.yarn/plugins/
 !.yarn/plugins/**
 !.yarn/releases/
 !.yarn/releases/**
-!.yarn/sdks/
-!.yarn/sdks/**
+.yarn/sdks/
+.yarn/sdks/**
 .yarn/unplugged/
 .yarn/unplugged/**
-!.yarn/versions/
-!.yarn/versions/**
+.yarn/versions/
+.yarn/versions/**
+
 .yarn/build-state.yml
 .yarn/install-state.gz
 
-# yarn .pnp*
-.pnp
 .pnp*
 .pnp.*
+.pnp.cjs
+.pnp.loader.mjs
 
-# yarn yarnrc.yml
-#.yarnrc
-#.yarnrc*
+.yarnrc*
+!.yarnrc.sample.yml
 !.yarnrc.yml
-
-# yarn yarn.lock
-!yarn.lock
-
-# npm package-lock.json
-!package-lock.json
