@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <CodeAnalysisRuleSet>..\..\settings.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors></WarningsAsErrors>
     <WarningsNotAsErrors></WarningsNotAsErrors>
@@ -19,6 +19,10 @@
     <DockerfileContext>..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="..\..\stylecop.json" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />

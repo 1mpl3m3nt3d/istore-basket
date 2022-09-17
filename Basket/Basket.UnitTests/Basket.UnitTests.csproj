@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <CodeAnalysisRuleSet>..\..\settings.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors></WarningsAsErrors>
     <WarningsNotAsErrors></WarningsNotAsErrors>
@@ -17,6 +17,10 @@
     <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="..\..\stylecop.json" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.7.0" />
