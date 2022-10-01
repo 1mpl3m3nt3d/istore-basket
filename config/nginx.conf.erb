@@ -25,6 +25,11 @@ http {
   server_names_hash_bucket_size 128; # this seems to be required for some vhosts
   server_names_hash_max_size 512;
 
+  upstream app_server {
+    server unix:/tmp/nginx.socket weight=1 fail_timeout=0;
+    #server host.docker.internal:5001 weight=1 fail_timeout=0;
+  }
+
   server {
     listen <%= ENV["PORT"] %>;
     listen [::]:<%= ENV["PORT"] %>;
@@ -67,11 +72,6 @@ http {
 
     #root <%= ENV['HOME'] || '/app' %><%= ENV['PUBLIC'] || '/public' %>;
     #index index.html index.htm index.php;
-
-    upstream app_server {
-      server unix:/tmp/nginx.socket weight=1 fail_timeout=0;
-      #server host.docker.internal:5001 weight=1 fail_timeout=0;
-    }
 
     proxy_buffering off;
     proxy_redirect off;
