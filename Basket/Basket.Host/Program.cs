@@ -100,7 +100,7 @@ if (app.Configuration["HttpLogging"] == "true")
 app.UseSwagger()
     .UseSwaggerUI(setup =>
     {
-        setup.SwaggerEndpoint($"{configuration["BasketApi"]}/swagger/v1/swagger.json", "Basket.API V1");
+        setup.SwaggerEndpoint("v1/swagger.json", "Basket.API V1");
         setup.OAuthClientId("basketswaggerui");
         setup.OAuthAppName("Basket Swagger UI");
     });
