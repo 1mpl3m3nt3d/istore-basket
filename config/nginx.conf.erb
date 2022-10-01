@@ -31,6 +31,8 @@ http {
   #include /etc/nginx/conf/proxy.conf;
   #include /etc/nginx/conf/fastcgi.conf;
 
+  #root <%= ENV['HOME'] || '/app' %>/public;
+
   #index index.html index.htm index.php;
 
   gzip on;
@@ -58,7 +60,10 @@ http {
   #access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/access.log' %> l2met;
 
   sendfile on;
+  #sendfile_max_chunk 1M;
+
   #tcp_nopush on;
+  #tcp_nodelay on;
 
   #keepalive_timeout 0;
 
@@ -85,6 +90,8 @@ http {
 
     access_log <%= ENV['NGINX_ACCESS_LOG_PATH'] || 'logs/nginx/_.access.log' %> main;
 
+    #root <%= ENV['HOME'] || '/app' %>/public;
+
     location / {
 
       # force SSL / redirect http -> https
@@ -96,6 +103,8 @@ http {
 
       #proxy_pass http://host.docker.internal:5001 weight=1 fail_timeout=0;
       #proxy_pass http://unix:/tmp/nginx.socket weight=1 fail_timeout=0;
+
+      #try_files $uri $uri/ $uri.html =404;
 
       proxy_redirect off;
 
@@ -141,22 +150,6 @@ http {
 
     #location /pgadmin {
     #  return 301 <%= ENV["REACT_APP_PGADMIN_URL"] || 'http://host.docker.internal:8001' %>/login;
-    #}
-
-    #location /basket/swagger {
-    #  return 301 http://host.docker.internal:5003/swagger;
-    #}
-
-    #location /catalog/swagger {
-    #  return 301 http://host.docker.internal:5000/swagger;
-    #}
-
-    #location /identity {
-    #  return 301 http://host.docker.internal:5002;
-    #}
-
-    #location /pgadmin {
-    #  return 301 http://host.docker.internal:8001/login;
     #}
 
     #location /assets/images {

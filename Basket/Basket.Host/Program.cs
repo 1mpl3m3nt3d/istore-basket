@@ -45,6 +45,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.AddConfiguration();
+builder.AddHttpLoggingConfiguration();
 
 builder.Services.Configure<RedisConfig>(builder.Configuration.GetSection("Redis"));
 
@@ -64,7 +65,7 @@ builder.Services.AddCors(
                 .WithOrigins(
                     configuration["Authorization:Authority"],
                     configuration["GlobalUrl"],
-                    configuration["PathBase"],
+                    configuration["BasketApi"],
                     configuration["SpaUrl"])
                 .AllowAnyMethod()
                 .AllowAnyHeader()
@@ -74,10 +75,32 @@ builder.AddNginxConfiguration();
 
 var app = builder.Build();
 
+var basePath = configuration["BasePath"];
+
+if (!string.IsNullOrEmpty(basePath))
+{
+    app.UsePathBase(basePath);
+}
+
+if (app.Configuration["HttpLogging"] == "true")
+{
+    app.UseHttpLogging();
+
+    app.Use(async (ctx, next) =>
+    {
+        var remoteAddress = ctx.Connection.RemoteIpAddress;
+        var remotePort = ctx.Connection.RemotePort;
+
+        app.Logger.LogInformation($"Request Remote: {remoteAddress}:{remotePort}");
+
+        await next(ctx);
+    });
+}
+
 app.UseSwagger()
     .UseSwaggerUI(setup =>
     {
-        setup.SwaggerEndpoint($"{configuration["PathBase"]}/swagger/v1/swagger.json", "Basket.API V1");
+        setup.SwaggerEndpoint($"{configuration["BasketApi"]}/swagger/v1/swagger.json", "Basket.API V1");
         setup.OAuthClientId("basketswaggerui");
         setup.OAuthAppName("Basket Swagger UI");
     });

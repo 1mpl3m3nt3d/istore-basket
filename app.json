@@ -1,0 +1,22 @@
+{
+  "name": "istore-basket",
+  "description": "iStore Basket",
+  "scripts": {
+  },
+  "env": {
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/dmathieu/heroku-buildpack-submodules",
+      "url": "https://github.com/jincod/dotnetcore-buildpack",
+      "url": "https://github.com/heroku/heroku-buildpack-nginx"
+    }
+  ]
+}
