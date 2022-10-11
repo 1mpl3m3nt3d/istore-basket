@@ -23,8 +23,8 @@ public class RedisCacheConnectionService : IRedisCacheConnectionService, IDispos
         var redisConfigurationOptions = ConfigurationOptions.Parse(keyValueConnectionString);
         redisConfigurationOptions.AllowAdmin = true;
         redisConfigurationOptions.AbortOnConnectFail = false;
-        // redisConfigurationOptions.CheckCertificateRevocation = false;
-        // redisConfigurationOptions.Ssl = true;
+        //redisConfigurationOptions.CheckCertificateRevocation = true;
+        //redisConfigurationOptions.Ssl = true;
 
         _connectionLazy =
             new Lazy<ConnectionMultiplexer>(()
