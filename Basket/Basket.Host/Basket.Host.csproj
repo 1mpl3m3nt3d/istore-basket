@@ -1,42 +1,48 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <AssemblyName>Basket.Host</AssemblyName>
-    <RootNamespace>Basket.Host</RootNamespace>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningsAsErrors></WarningsAsErrors>
-    <WarningsNotAsErrors></WarningsNotAsErrors>
-    <DisabledWarnings></DisabledWarnings>
-    <NoWarn></NoWarn>
-    <IsPackable>false</IsPackable>
-    <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
-    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-    <DockerfileContext>..\..</DockerfileContext>
-    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Basket.Host</AssemblyName>
+        <RootNamespace>Basket.Host</RootNamespace>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <WarningsAsErrors></WarningsAsErrors>
+        <WarningsNotAsErrors></WarningsNotAsErrors>
+        <DisabledWarnings></DisabledWarnings>
+        <NoWarn></NoWarn>
+        <IsPackable>false</IsPackable>
+        <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <DockerfileContext>..\..</DockerfileContext>
+        <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\stylecop.json" />
-    <AdditionalFiles Include="..\..\stylecop.ruleset" />
-  </ItemGroup>
+    <ItemGroup>
+        <AdditionalFiles Include="..\..\stylecop.json" />
+        <AdditionalFiles Include="..\..\stylecop.ruleset" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+        <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
+        <PackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.435">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\Infrastructure\Infrastructure\Infrastructure.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <Content Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Infrastructure\Infrastructure\Infrastructure\Infrastructure.csproj" />
+    </ItemGroup>
 
 </Project>
