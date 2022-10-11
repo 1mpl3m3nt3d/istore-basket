@@ -26,9 +26,9 @@ public class BasketBffController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.TooManyRequests)]
     public async Task<IActionResult> Get()
     {
-        var basketId = User.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
+        var userId = User.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
 
-        var response = await _basketService.GetAsync(basketId!);
+        var response = await _basketService.GetAsync(userId!);
 
         return Ok(response);
     }
