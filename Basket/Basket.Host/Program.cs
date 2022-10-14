@@ -1,10 +1,8 @@
+using System.Reflection;
+
 using Basket.Host.Configurations;
 using Basket.Host.Services;
 using Basket.Host.Services.Interfaces;
-
-using Infrastructure.Configuration;
-
-using Microsoft.AspNetCore.HttpOverrides;
 
 var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -21,10 +19,26 @@ builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
 
     var env = hostingContext.HostingEnvironment;
 
-    config.SetBasePath(baseDirectory);
+    config.SetBasePath(hostingContext.HostingEnvironment.ContentRootPath);
 
-    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    config.AddInMemoryCollection();
+
+    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
     config.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+    if (env.IsDevelopment())
+    {
+        if (!string.IsNullOrEmpty(env.ApplicationName))
+        {
+            var appAssembly = Assembly.Load(new AssemblyName(env.ApplicationName));
+            if (appAssembly != null)
+            {
+                config.AddUserSecrets(appAssembly, optional: true);
+            }
+        }
+    }
+
+    config.AddEnvironmentVariables(prefix: "ASPNETCORE_");
 
     config.AddEnvironmentVariables();
 
@@ -75,11 +89,13 @@ builder.Services.AddHttpsRedirection(options =>
 {
     options.RedirectStatusCode = (int)HttpStatusCode.TemporaryRedirect;
 
-    var isPortParsed = int.TryParse(builder.Configuration["HTTPS_PORT"], out var httpsPort);
+    var httpsPort = builder.Configuration["HTTPS_PORT"] ?? Environment.GetEnvironmentVariable("HTTPS_PORT");
+
+    var isPortParsed = int.TryParse(httpsPort, out var portParsed);
 
     if (isPortParsed)
     {
-        options.HttpsPort = httpsPort;
+        options.HttpsPort = portParsed;
     }
 });
 

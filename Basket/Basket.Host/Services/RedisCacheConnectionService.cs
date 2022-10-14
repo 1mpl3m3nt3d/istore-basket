@@ -10,21 +10,27 @@ public class RedisCacheConnectionService : IRedisCacheConnectionService, IDispos
     private bool _disposed;
 
     public RedisCacheConnectionService(
-        IOptions<RedisConfig> config)
+        IOptionsMonitor<RedisConfig> config)
     {
-        var envVar = config.Value.EnvVar;
+        var envVar = config.CurrentValue.EnvVar;
 
         var connectionString = envVar != null
-            ? Environment.GetEnvironmentVariable(envVar) ?? config.Value.ConnectionString
-            : config.Value.ConnectionString;
+            ? Environment.GetEnvironmentVariable(envVar) ?? config.CurrentValue.ConnectionString
+            : config.CurrentValue.ConnectionString;
 
         var keyValueConnectionString = GetRedisConnectionString(connectionString);
 
         var redisConfigurationOptions = ConfigurationOptions.Parse(keyValueConnectionString);
         redisConfigurationOptions.AllowAdmin = true;
         redisConfigurationOptions.AbortOnConnectFail = false;
-        //redisConfigurationOptions.CheckCertificateRevocation = true;
-        //redisConfigurationOptions.Ssl = true;
+
+        var isEnvDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+        if (!isEnvDevelopment)
+        {
+            redisConfigurationOptions.CheckCertificateRevocation = true;
+            redisConfigurationOptions.Ssl = true;
+        }
 
         _connectionLazy =
             new Lazy<ConnectionMultiplexer>(()
