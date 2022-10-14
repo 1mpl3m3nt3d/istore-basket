@@ -2,11 +2,128 @@ using Basket.Host.Configurations;
 using Basket.Host.Services;
 using Basket.Host.Services.Interfaces;
 
+using Infrastructure.Configuration;
+
+using Microsoft.AspNetCore.HttpOverrides;
+
 var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-var configuration = GetConfiguration();
+var webApplicationOptions = new WebApplicationOptions()
+{
+    ContentRootPath = baseDirectory,
+};
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions() { ContentRootPath = baseDirectory });
+var builder = WebApplication.CreateBuilder(webApplicationOptions);
+
+builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
+{
+    config.Sources.Clear();
+
+    var env = hostingContext.HostingEnvironment;
+
+    config.SetBasePath(baseDirectory);
+
+    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    config.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+    config.AddEnvironmentVariables();
+
+    if (args != null)
+    {
+        config.AddCommandLine(args);
+    }
+});
+
+builder.AddConfiguration();
+
+// 1st variant how to get desired configuration for WebApplicationBuilder in Program.cs
+//var appConfig = new AppConfig();
+//builder.Configuration.GetSection(AppConfig.App).Bind(appConfig);
+
+// 2nd variant how to get desired configuration for WebApplicationBuilder in Program.cs
+var appConfig = builder.Configuration.GetSection(AppConfig.App).Get<AppConfig>();
+var authConfig = builder.Configuration.GetSection(AuthorizationConfig.Authorization).Get<AuthorizationConfig>();
+
+builder.AddHttpLoggingConfiguration();
+builder.AddNginxConfiguration();
+
+builder.Services.Configure<RedisConfig>(builder.Configuration.GetSection(RedisConfig.Redis));
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedHost |
+        ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = 2;
+    options.RequireHeaderSymmetry = false;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddCertificateForwarding(options => { });
+
+builder.Services.AddHsts(options =>
+{
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(60);
+    options.Preload = true;
+});
+
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = (int)HttpStatusCode.TemporaryRedirect;
+
+    var isPortParsed = int.TryParse(builder.Configuration["HTTPS_PORT"], out var httpsPort);
+
+    if (isPortParsed)
+    {
+        options.HttpsPort = httpsPort;
+    }
+});
+
+builder.Services.AddCookiePolicy(options =>
+{
+    options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.None;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.SameAsRequest;
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = false;
+    options.Cookie.Expiration = TimeSpan.FromDays(30);
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.HttpOnly = false;
+    options.Cookie.Expiration = TimeSpan.FromDays(30);
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddCors(
+    options => options
+        .AddPolicy(
+            "CorsPolicy",
+            corsBuilder => corsBuilder
+                //.SetIsOriginAllowed((host) => true)
+                .WithOrigins(
+                    authConfig.Authority,
+                    appConfig.BaseUrl,
+                    appConfig.GlobalUrl,
+                    appConfig.SpaUrl)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()));
 
 builder.Services
     .AddControllers(options => options.Filters.Add(typeof(HttpGlobalExceptionFilter)))
@@ -21,7 +138,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "The Basket Service HTTP API",
     });
 
-    var authority = configuration["Authorization:Authority"];
+    var authority = authConfig.Authority;
 
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
@@ -44,45 +161,26 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<AuthorizeCheckOperationFilter>();
 });
 
-builder.AddConfiguration();
-builder.AddHttpLoggingConfiguration();
-
-builder.Services.Configure<RedisConfig>(builder.Configuration.GetSection("Redis"));
-
-builder.Services.AddAuthorization(configuration);
+builder.AddAuthorization();
 
 builder.Services.AddTransient<IJsonSerializer, JsonSerializer>();
 builder.Services.AddTransient<IRedisCacheConnectionService, RedisCacheConnectionService>();
 builder.Services.AddTransient<ICacheService, CacheService>();
 builder.Services.AddTransient<IBasketService, BasketService>();
 
-builder.Services.AddCors(
-    options => options
-        .AddPolicy(
-            "CorsPolicy",
-            builder => builder
-                .SetIsOriginAllowed((host) => true)
-                .WithOrigins(
-                    configuration["Authorization:Authority"],
-                    configuration["GlobalUrl"],
-                    configuration["BasketApi"],
-                    configuration["SpaUrl"])
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()));
-
-builder.AddNginxConfiguration();
-
 var app = builder.Build();
 
-var basePath = configuration["BasePath"];
+// a variant how to get desired configuration for WebApplication in Program.cs
+var webAppConfig = app.Services.GetRequiredService<IOptionsMonitor<AppConfig>>().CurrentValue;
+
+var basePath = webAppConfig.BasePath;
 
 if (!string.IsNullOrEmpty(basePath))
 {
     app.UsePathBase(basePath);
 }
 
-if (app.Configuration["HttpLogging"] == "true")
+if (webAppConfig.HttpLogging == "true")
 {
     app.UseHttpLogging();
 
@@ -97,6 +195,49 @@ if (app.Configuration["HttpLogging"] == "true")
     });
 }
 
+var forwardedHeadersOptions = new ForwardedHeadersOptions()
+{
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedHost |
+        ForwardedHeaders.XForwardedProto,
+    ForwardLimit = 2,
+    RequireHeaderSymmetry = false,
+};
+
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
+app.UseCertificateForwarding();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+
+    // The default HSTS value is 30 days.
+    // see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
+//app.UseDefaultFiles();
+//app.UseStaticFiles();
+
+var cookiePolicyOptions = new CookiePolicyOptions()
+{
+    HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.None,
+    MinimumSameSitePolicy = SameSiteMode.None,
+    Secure = CookieSecurePolicy.SameAsRequest,
+};
+
+app.UseCookiePolicy(cookiePolicyOptions);
+
 app.UseSwagger()
     .UseSwaggerUI(setup =>
     {
@@ -107,26 +248,24 @@ app.UseSwagger()
 
 app.UseRouting();
 
+//app.UseRequestLocalization();
+
 app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+//app.UseSession();
+//app.UseResponseCompression();
+//app.UseResponseCaching();
+
+//app.MapControllers();
+//app.MapDefaultControllerRoute();
+
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapDefaultControllerRoute();
     endpoints.MapControllers();
+    endpoints.MapDefaultControllerRoute();
 });
 
 app.Run();
-
-IConfiguration GetConfiguration()
-{
-    var builder = new ConfigurationBuilder()
-        .SetBasePath(baseDirectory)
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddEnvironmentVariables()
-        .AddCommandLine(args);
-
-    return builder.Build();
-}
