@@ -2,7 +2,7 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Net;
 
 global using Infrastructure;
-global using Infrastructure.Configuration;
+global using Infrastructure.Configurations;
 global using Infrastructure.Extensions;
 global using Infrastructure.Filters;
 global using Infrastructure.Identity;
