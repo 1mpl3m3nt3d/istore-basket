@@ -16,13 +16,13 @@ public class CacheService : ICacheService
     public CacheService(
         ILogger<CacheService> logger,
         IRedisCacheConnectionService redisCacheConnectionService,
-        IOptions<RedisConfig> config,
+        IOptionsMonitor<RedisConfig> config,
         IJsonSerializer jsonSerializer)
     {
         _logger = logger;
         _redisCacheConnectionService = redisCacheConnectionService;
         _jsonSerializer = jsonSerializer;
-        _config = config.Value;
+        _config = config.CurrentValue;
     }
 
     public Task AddOrUpdateAsync<T>(string key, T value)

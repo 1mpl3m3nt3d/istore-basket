@@ -8,7 +8,7 @@ public class CacheServiceTest
 {
     private readonly ICacheService _cacheService;
 
-    private readonly Mock<IOptions<RedisConfig>> _config;
+    private readonly Mock<IOptionsMonitor<RedisConfig>> _config;
 
     private readonly Mock<IConnectionMultiplexer> _connectionMultiplexer;
 
@@ -22,24 +22,24 @@ public class CacheServiceTest
 
     public CacheServiceTest()
     {
-        _config = new Mock<IOptions<RedisConfig>>();
+        _config = new Mock<IOptionsMonitor<RedisConfig>>();
         _logger = new Mock<ILogger<CacheService>>();
 
-        _config.Setup(x => x.Value).Returns(new RedisConfig() { CacheTimeout = TimeSpan.Zero });
+        _config.Setup(x => x.CurrentValue).Returns(new RedisConfig() { CacheTimeout = TimeSpan.Zero });
 
         _redisCacheConnectionService = new Mock<IRedisCacheConnectionService>();
         _connectionMultiplexer = new Mock<IConnectionMultiplexer>();
         _redisDataBase = new Mock<IDatabase>();
+
+        _redisCacheConnectionService
+            .Setup(x => x.Connection)
+            .Returns(_connectionMultiplexer.Object);
 
         _connectionMultiplexer
             .Setup(x => x.GetDatabase(
                 It.IsAny<int>(),
                 It.IsAny<object>()))
             .Returns(_redisDataBase.Object);
-
-        _redisCacheConnectionService
-            .Setup(x => x.Connection)
-            .Returns(_connectionMultiplexer.Object);
 
         _jsonSerializer = new Mock<IJsonSerializer>();
 
@@ -57,7 +57,7 @@ public class CacheServiceTest
         // arrange
         var testEntity = new
         {
-            UserId = "TestUserId",
+            UserId = "id",
             Data = "data",
         };
 
@@ -96,7 +96,7 @@ public class CacheServiceTest
         // arrange
         var testEntity = new
         {
-            UserId = "TestUserId",
+            UserId = "id",
             Data = "data",
         };
 
@@ -135,7 +135,7 @@ public class CacheServiceTest
         // arrange
         var testEntity = new
         {
-            UserId = "TestUserId",
+            UserId = "id",
             Data = "data",
         };
 
@@ -172,10 +172,21 @@ public class CacheServiceTest
     public async Task GetAsync_Failed()
     {
         // arrange
-        var testName = "testName";
+        var testEntity = new
+        {
+            UserId = "id",
+            Data = "data",
+        };
+
+        _jsonSerializer.Setup(x => x.Deserialize<string>(It.IsAny<string>())).Returns(testEntity.Data);
+
+        _redisDataBase.Setup(x => x.StringGetAsync(
+                It.Is<RedisKey>(rk => rk.Equals(testEntity.UserId)),
+                It.IsAny<CommandFlags>()))
+            .ReturnsAsync(string.Empty);
 
         // act
-        var result = await _cacheService.GetAsync<string>(testName);
+        var result = await _cacheService.GetAsync<string>(testEntity.UserId);
 
         // assert
         result.Should().BeNull();
@@ -185,20 +196,24 @@ public class CacheServiceTest
     public async Task GetAsync_Success()
     {
         // arrange
-        var data = "data";
+        var testEntity = new
+        {
+            UserId = "id",
+            Data = "data",
+        };
 
-        _jsonSerializer.Setup(x => x.Deserialize<string>(It.IsAny<string>())).Returns(data);
+        _jsonSerializer.Setup(x => x.Deserialize<string>(It.IsAny<string>())).Returns(testEntity.Data);
 
         _redisDataBase.Setup(x => x.StringGetAsync(
-                It.IsAny<RedisKey>(),
+                It.Is<RedisKey>(rk => rk.Equals(testEntity.UserId)),
                 It.IsAny<CommandFlags>()))
-            .ReturnsAsync(data);
+            .ReturnsAsync(testEntity.Data);
 
         // act
-        var result = await _cacheService.GetAsync<string>(data);
+        var result = await _cacheService.GetAsync<string>(testEntity.UserId);
 
         // assert
-        result.Should().Be(data);
+        result.Should().Be(testEntity.Data);
     }
 
     [Fact]
@@ -207,14 +222,14 @@ public class CacheServiceTest
         // arrange
         var testEntity = new
         {
-            FakeUser = "FakeUser",
+            UserId = "id",
             Data = "data",
         };
 
         _jsonSerializer.Setup(x => x.Deserialize<string>(It.IsAny<string>())).Returns(testEntity.Data);
 
         _redisDataBase.Setup(x => x.StringSetAsync(
-        It.Is<RedisKey>(x => x.Equals(testEntity.FakeUser)),
+        It.Is<RedisKey>(x => x.Equals(testEntity.UserId)),
         It.IsAny<RedisValue>(),
         It.IsAny<TimeSpan?>(),
         It.IsAny<bool>(),
@@ -223,14 +238,14 @@ public class CacheServiceTest
         .ReturnsAsync(false);
 
         _redisDataBase.Setup(x => x.StringGetAsync(
-        It.Is<RedisKey>(x => x.Equals(testEntity.FakeUser)),
+        It.Is<RedisKey>(x => x.Equals(testEntity.UserId)),
         It.IsAny<CommandFlags>()))
         .ReturnsAsync(testEntity.Data);
 
         // act
-        await _cacheService.DeleteAsync(testEntity.FakeUser);
+        await _cacheService.DeleteAsync(testEntity.UserId);
 
-        var result = await _cacheService.GetAsync<string>(testEntity.FakeUser);
+        var result = await _cacheService.GetAsync<string>(testEntity.UserId);
 
         // assert
         result.Should().Be(testEntity.Data);
@@ -242,7 +257,7 @@ public class CacheServiceTest
         // arrange
         var testEntity = new
         {
-            UserId = "TestUserId",
+            UserId = "id",
             Data = "data",
         };
 
