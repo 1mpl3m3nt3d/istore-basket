@@ -24,7 +24,7 @@ public class BasketBffController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(GetBasketResponse), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.TooManyRequests)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetBasket()
     {
         var userId = User.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
 
@@ -36,7 +36,7 @@ public class BasketBffController : ControllerBase
     [HttpPost]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.TooManyRequests)]
-    public async Task<IActionResult> Update(UpdateBasketRequest data)
+    public async Task<IActionResult> UpdateBasket(UpdateBasketRequest data)
     {
         var userId = User.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
 
@@ -48,7 +48,7 @@ public class BasketBffController : ControllerBase
     [HttpPost]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.TooManyRequests)]
-    public async Task<IActionResult> Delete()
+    public async Task<IActionResult> DeleteBasket()
     {
         var userId = User.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
 
